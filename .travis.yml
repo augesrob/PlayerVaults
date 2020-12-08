@@ -1,17 +1,9 @@
 language: java
 jdk:
 - openjdk8
-
-# Caching for faster builds
 cache:
   directories:
   - $HOME/.m2
-
-# Only re-build craftbukkit/spigot versions that are missing in the cache
-# Add entries here for every required version of craftbukkit
-before_install:
-- ./installSpigotDependencies.sh
-
 install:
   - >-
     wget
