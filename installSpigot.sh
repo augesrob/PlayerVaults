@@ -1,23 +1,13 @@
 #!/usr/bin/env bash
-if [ $# -eq 0 ]; then
-    echo "Missing argument(s)"
-    exit 1
-fi
-
 mkdir -p $HOME/spigot-build
 pushd $HOME/spigot-build
 echo "Downloading Spigot Build Tools for minecraft version $1"
-curl https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar -o $HOME/spigot-build/BuildTools.jar
-
-# Save status of core.autocrlf
-git_autocrlf=`git config --global core.autocrlf`
-# Unset autocrlf, required by BuildTools under linux
+wget https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar -O $HOME/spigot-build/BuildTools.jar
 git config --global --unset core.autocrlf
-
-# Build spigot
 echo "Building Spigot using Spigot Build Tools for minecraft version $1 (this might take a while)"
-java -Xmx1500M -jar BuildTools.jar --rev $1 --compile CRAFTBUKKIT,SPIGOT | grep Installing
-
-# Reset autocrlf
-git config --global core.autocrlf $git_autocrlf
+java -Xmx1500M -jar BuildTools.jar --rev $1 | grep Installing
+echo "Installing Spigot jar in Maven"
+mvn install:install-file -Dfile=$HOME/spigot-build/spigot-$1.jar -Dpackaging=jar -DpomFile=$HOME/spigot-build/Spigot/Spigot-Server/pom.xml
+echo "Installing CraftBukkit jar in Maven"
+mvn install:install-file -Dfile=$HOME/spigot-build/craftbukkit-$1.jar -Dpackaging=jar -DpomFile=$HOME/spigot-build/CraftBukkit/pom.xml
 popd
